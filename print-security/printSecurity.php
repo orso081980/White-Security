@@ -101,7 +101,8 @@ if ( !class_exists( 'printSecurity' ) ) {
 				'Print security Crud',
 				'manage_options',
 				'wpb_lastlogin',
-				array($this, 'wpb_lastlogin')
+				array($this, 'wpb_lastlogin'),
+				'dashicons-admin-site'
 			);
 
 		}
