@@ -126,7 +126,7 @@ if ( !class_exists( 'printSecurity' ) ) {
 			update_user_meta( $users->ID, 'user_ip_address', $ip );
 			$users_lo = get_users();
 			$user_data = [];
-			
+
 			foreach ($users_lo as $key => $user_list) {
 
 				$last_login = get_user_meta($user_list->ID, 'printSecurity');
@@ -149,18 +149,20 @@ if ( !class_exists( 'printSecurity' ) ) {
 			}
 
 			$sql = $user_data[$users->ID];
-
+			$last_ip = $sql['user_ip'];
+			$last_login = $sql['user_log'];
+			$last_times = $sql['user_times'];
 			$this->wpdb->insert(
 				$this->accessTable,
 				array(
 					'user_login'	=> $users->user_login,
 					'user_id'		=> $users->ID,
-					'user_ip'		=> $true_ip,
-					'user_log'		=> $the_login_date,
+					'user_ip'		=> $last_ip,
+					'user_log'		=> $last_login,
 					'user_rule'		=> $users->roles[0],
-					'user_times'	=> $true_user_how_many_times
+					'user_times'	=> $last_times
 				),
-				array('%s', '%d', '%s')
+				array('%s', '%d', '%s', '%s', '%s', '%d')
 			);
 
 		}
