@@ -1,8 +1,8 @@
 
 <div class="wrap">
 	<h2>Print Security</h2>
-	<table class="table">
-		<thead>
+	<table class="table table-striped">
+		<thead class="thead-dark">
 			<tr>
 				<th>Username</th>
 				<th>User Id</th>
