@@ -14,7 +14,7 @@
 		</thead>
 		<tbody>
 			
-			<?php foreach ($user_data as $values): ?>
+			<?php foreach ($rows as $values): ?>
 				<tr>
 					<?php foreach ($values as $value): ?>
 						<td><?= $value; ?></td>

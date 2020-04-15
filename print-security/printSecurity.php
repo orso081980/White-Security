@@ -57,7 +57,6 @@ if ( !class_exists( 'printSecurity' ) ) {
 			}
 
 			$ip = apply_filters( 'user_ip_address', $ip );
-
 			return $ip;
 
 		}
@@ -69,8 +68,9 @@ if ( !class_exists( 'printSecurity' ) ) {
 			`user_login` varchar(255) NOT NULL,
 			`user_id` int(11) NOT NULL,
 			`user_ip`  varchar(255) NOT NULL,
-			`user_log` int(11) NOT NULL,
+			`user_log` varchar(255) NOT NULL,
 			`user_rule` varchar(255) NOT NULL,
+			`user_times` int(11) NOT NULL,
 			PRIMARY KEY (`id`) ) ENGINE=InnoDB DEFAULT CHARSET=latin1 ;";
 
 			require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
@@ -91,7 +91,7 @@ if ( !class_exists( 'printSecurity' ) ) {
 			}
 
 			$sql = "DROP TABLE IF EXISTS $this->accessTable";
-            $this->wpdb->query($sql);
+			$this->wpdb->query($sql);
 
 		}
 
@@ -118,40 +118,26 @@ if ( !class_exists( 'printSecurity' ) ) {
 			} else {
 				$printSecurity_new_value = intval($printSecurity_count);
 				$printSecurity_new_value++;
-
 				update_user_meta($users->ID, 'printSecurity_count', $printSecurity_new_value);
 			}
 
 			$ip = self::get_user_ip_address();
 			
 			update_user_meta( $users->ID, 'user_ip_address', $ip );
-
-		}
-
-		public function wpb_lastlogin() { 
-
-			wp_register_style( 'custom_wp_admin_css', plugins_url('/css/bootstrap.min.css', __FILE__ ), false, '1.0.0' );
-			wp_enqueue_style( 'custom_wp_admin_css' );
-			add_action( 'admin_enqueue_scripts', 'wpStyle' );
-
-			//$user = wp_get_current_user();
-			$users = get_users();
+			$users_lo = get_users();
+			$user_data = [];
 			
-			foreach ($users as $user_list) {
+			foreach ($users_lo as $key => $user_list) {
 
 				$last_login = get_user_meta($user_list->ID, 'printSecurity');
-				
 				$user_how_many_times = get_user_meta($user_list->ID, 'printSecurity_count');
-
 				$true_user_how_many_times = empty($user_how_many_times) ? 'not logged in yet' : $user_how_many_times[0];
-
 				$last_login = empty($last_login) ? $the_login_date = 'Not logged in yet' : $the_login_date = date('M j, Y h:i:s a', $last_login[0]);
-
 				$the_ip = get_user_meta($user_list->ID, 'user_ip_address');
-
 				$true_ip = empty($the_ip) ? 'not ip yet' : $the_ip[0];
-
-				$user_data[] = [
+				
+				$user_data_id = $user_list->ID;
+				$user_data[$user_data_id] = [
 					'user_login'	=> $user_list->user_login,
 					'user_id'		=> $user_list->ID,
 					'user_ip'		=> $true_ip,
@@ -161,6 +147,32 @@ if ( !class_exists( 'printSecurity' ) ) {
 				];
 
 			}
+
+			$sql = $user_data[$users->ID];
+
+			$this->wpdb->insert(
+				$this->accessTable,
+				array(
+					'user_login'	=> $users->user_login,
+					'user_id'		=> $users->ID,
+					'user_ip'		=> $true_ip,
+					'user_log'		=> $the_login_date,
+					'user_rule'		=> $users->roles[0],
+					'user_times'	=> $true_user_how_many_times
+				),
+				array('%s', '%d', '%s')
+			);
+
+		}
+
+		public function wpb_lastlogin() { 
+
+			wp_register_style( 'custom_wp_admin_css', plugins_url('/css/bootstrap.min.css', __FILE__ ), false, '1.0.0' );
+			wp_enqueue_style( 'custom_wp_admin_css' );
+			add_action( 'admin_enqueue_scripts', 'wpStyle' );
+
+			$rows = $this->wpdb->get_results("SELECT `user_login`, `user_id`, `user_ip`, `user_log`, `user_rule`, `user_times`
+				FROM $this->accessTable");
 			
 			require_once( PRNSEC_ROOTDIR . 'printSecurityMain.php' );
 
