@@ -192,7 +192,7 @@ if ( !class_exists( 'printSecurity' ) ) {
 
 		public function users_last_login() {
 
-			$cur_login = current_time(timestamp, 0);
+			$cur_login = time();
 			$userinfo = wp_get_current_user();
 			update_user_meta( $userinfo->ID, 'last_logout', $cur_login );
 
